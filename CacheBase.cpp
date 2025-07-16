@@ -1,6 +1,6 @@
 #include "CacheBase.hpp"
 
-namespace eventapi {
+namespace cache {
 // Logging
 log4cxx::LoggerPtr CacheBase::mLogger = log4cxx::Logger::getLogger("cache.CacheBase");
 

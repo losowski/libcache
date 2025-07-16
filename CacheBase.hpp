@@ -13,7 +13,7 @@ using namespace std;
 namespace cache {
 
 // Class to actually run the code
-class template<tKey, tValue>CacheBase
+ template<typename tKey, typename tValue> class CacheBase
 {
 	public:
 		CacheBase(void);
@@ -35,7 +35,7 @@ class template<tKey, tValue>CacheBase
 		void _remove(tKey & key);
 	protected:
 		// Object Storage
-		map<tKey, tValue>						mStorage
+		map<tKey, tValue>						mStorage;
 	private:
 		static log4cxx::LoggerPtr				mLogger;
 }; // class

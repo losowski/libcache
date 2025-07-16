@@ -12,7 +12,7 @@
 */
 
 
-namespace eventapi {
+namespace cache {
 // Logging
 log4cxx::LoggerPtr TimedCache::mLogger = log4cxx::Logger::getLogger("cache.TimedCache");
 
