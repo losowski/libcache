@@ -13,12 +13,17 @@
 - Adding to map
 	< key, object>
 	- Sets expiry object
-	- If time, then perform housekeeping
+	- END: If time, then perform housekeeping
 - Accessing
-	- If time, then perform housekeeping
+	- Get object if exists
+	- Check validity of object
+		- If invalid = housekeeping
+	- END: If time, then perform housekeeping
 - Deletion (not implemented)
 	- Delete entry
 	- If time, then perform housekeeping
+
+
 - Housekeeping
 	- When run sets a time in the future (now + housekeeping interval)
 	- Any usage will get current time and compare to housekeeping time

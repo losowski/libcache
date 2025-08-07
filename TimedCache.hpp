@@ -1,37 +1,120 @@
 #ifndef TIMEDCACHE_HPP
 #define TIMEDCACHE_HPP
 
-// Base Class
-#include <CacheBase.hpp>
 
-// include log4cxx header files.
-#include <log4cxx/logger.h>
-#include <log4cxx/basicconfigurator.h>
+// Container
+#include <map>
+#include <list>
+
+// Required libraries
+#include <chrono>
+#include <ctime>
+#include <algorithm>
+
+/*
+	URLS:
+		https://cppreference.com/w/cpp/chrono.html#Calendar
+		https://cppreference.com/w/cpp/chrono/system_clock/now.html
+*/
+
+
+// Base Class
+#include "Cache.hpp"
 
 using namespace std;
 
 namespace cache {
 
 // Class to actually run the code
-class template<tKey, tValue>TimedCache: public CacheBase
+template<typename _Key, typename _Value>
+class TimedCache: public Cache<_Key, _Value>
 {
+	// Types
+	typedef typename map<_Key, _Value>::iterator		_tItMap;
+	typedef list<_Key>							_tList;
+	typedef typename list<_Key>::iterator				_tItList;
+	// Class functions
 	public:
-		TimedCache(unsigned int expirySeconds);
+		TimedCache(const unsigned int objectLimit = 1000, const unsigned int expirySeconds = 600):
+				Cache<_Key, _Value>::Cache(objectLimit),
+				mExpirySeconds(expirySeconds)
+			{
+			}
 	public:
 		~TimedCache(void);
 	public:
 		// Add
-		void add(tKey & key, tValue & value);
+		void add(const _Key & key, const _Value & value)
+			{
+				Cache<_Value, _Value>::add(key, value);
+			}
 		// Remove
-		void remove(tKey & key);
+		void remove(const _Key & key)
+			{
+				Cache<_Value, _Value>::remove(key);
+			}
+		// Get
+		_Value & get(const _Key & key)
+			{
+				_tItMap it = Cache<_Value, _Value>::mStorage.find(key);
+				if (it != Cache<_Value, _Value>::mStorage.end())
+				{
+					_Value & value = Cache<_Value, _Value>::mStorage.at(key);
+					std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
+					std::chrono::time_point<std::chrono::steady_clock> tNow = std::chrono::steady_clock::now();
+					if (tNow < expiry)
+					{
+						return value;
+					}
+					else
+					{
+						housekeeping();
+						return Cache<_Value, _Value>::cNULL;
+					}
+				}
+				else
+				{
+					return Cache<_Value, _Value>::cNULL;
+				}
+			}
+		// Refresh the object
+		void refresh(_Value * value)
+			{
+				if (value)
+				{
+					value->refresh(mExpirySeconds);
+				}
+			}
+		// Perform houseKeeping
+		void housekeeping(void)
+			{
+				// Check Expiry
+				std::chrono::time_point<std::chrono::steady_clock> dNow = std::chrono::steady_clock::now();
+				if (dNow > mHousekeeping)
+				{
+					_tList removeList;
+					for (_tItMap it = Cache<_Value, _Value>::mStorage.begin(); it < Cache<_Value, _Value>::mStorage.end(); it++)
+					{
+						std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
+						if (dNow > expiry)
+						{
+							removeList.push(it->first);
+						}
+					}
+					// Clear expiry list
+					for (_tItList it = removeList.begin(); it < removeList.end(); it++)
+					{
+						remove(*it);
+					}
+					// Reset Housekeeping timeout
+					mHousekeeping = dNow + mExpirySeconds;
+				}
+			}
 	protected:
-		void housekeeping(void);
-	protected:
+		// Timed details
+		std::chrono::time_point<std::chrono::steady_clock>			mHousekeeping;
 		// Timeout
-		unsigned int							mExpirySeconds;
-		map<tKey, unsigned int>					mExpiry;
-	private:
-		static log4cxx::LoggerPtr				mLogger;
+		const std::chrono::duration<int>							mExpirySeconds;
 }; // class
 
 } // namespace
