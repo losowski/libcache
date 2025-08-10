@@ -30,9 +30,12 @@ template<typename _Key, typename _Value>
 class TimedCache: public Cache<_Key, _Value>
 {
 	// Types
-	typedef typename map<_Key, _Value>::iterator		_tItMap;
+	typedef map<_Key, _Value>					_tMap;
+	typedef typename _tMap::iterator			_tItMap;
+
 	typedef list<_Key>							_tList;
-	typedef typename list<_Key>::iterator				_tItList;
+	typedef typename _tList::iterator			_tItList;
+
 	// Class functions
 	public:
 		TimedCache(const unsigned int objectLimit = 1000, const unsigned int expirySeconds = 600):
@@ -53,7 +56,7 @@ class TimedCache: public Cache<_Key, _Value>
 			{
 				Cache<_Value, _Value>::remove(key);
 			}
-		// Get
+		// Get the object
 		_Value & get(const _Key & key)
 			{
 				_tItMap it = Cache<_Value, _Value>::mStorage.find(key);
@@ -77,14 +80,17 @@ class TimedCache: public Cache<_Key, _Value>
 					return Cache<_Value, _Value>::cNULL;
 				}
 			}
-		// Refresh the object
-		void refresh(_Value * value)
+		// Get the object and refresh
+		_Value & refreshGget(const _Key & key)
 			{
-				if (value)
-				{
-					value->refresh(mExpirySeconds);
-				}
+				// Get the object
+				_Value & value = get(key);
+				// Perform the refresh
+				refresh(value);
+				// Return the object
+				return value;
 			}
+
 		// Perform houseKeeping
 		void housekeeping(void)
 			{
@@ -93,7 +99,7 @@ class TimedCache: public Cache<_Key, _Value>
 				if (dNow > mHousekeeping)
 				{
 					_tList removeList;
-					for (_tItMap it = Cache<_Value, _Value>::mStorage.begin(); it < Cache<_Value, _Value>::mStorage.end(); it++)
+					for (_tItMap it = Cache<_Value, _Value>::mStorage.begin(); it != Cache<_Value, _Value>::mStorage.end(); it++)
 					{
 						std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
 						if (dNow > expiry)
@@ -110,7 +116,16 @@ class TimedCache: public Cache<_Key, _Value>
 					mHousekeeping = dNow + mExpirySeconds;
 				}
 			}
-	protected:
+	private:
+		// Refresh the object
+		void refresh(_Value * value)
+			{
+				if (value)
+				{
+					value->refresh(mExpirySeconds);
+				}
+			}
+	private:
 		// Timed details
 		std::chrono::time_point<std::chrono::steady_clock>			mHousekeeping;
 		// Timeout

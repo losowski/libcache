@@ -10,7 +10,7 @@
 #include <algorithm>
 
 // Base Class
-#include "TimedCacheItem.hpp"
+#include "CacheItem.hpp"
 
 
 using namespace std;
@@ -23,19 +23,23 @@ class TimedCacheItem : public CacheItem<_Value>
 	// Class functions
 	public:
 		// Default
-		TimedCacheItem(void);
+		TimedCacheItem(void)
+			{
+			}
 		// With object
 		TimedCacheItem(shared_ptr<_Value> ptr):
 			CacheItem<_Value>::CacheItem(ptr)
 			{
 			}
 	public:
-		~TimedCacheItem(void);
+		~TimedCacheItem(void)
+			{
+			}
 	public:
 		// get
 		_Value * get(void)
 			{
-				return CacheItem<_Value>::mPtr.get();
+				return CacheItem<_Value>::get();
 			}
 		// Cache refresh
 		void refresh(const std::chrono::duration<int> ttl)

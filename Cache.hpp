@@ -15,7 +15,8 @@ template<typename _Key, typename _Value>
 class Cache
 {
 	// Types
-	typedef typename map<_Key, _Value>::iterator		_tItMap;
+	typedef map<_Key, _Value>					_tMap;
+	typedef typename _tMap::iterator			_tItMap;
 
 	// Class functions
 	public:
@@ -66,18 +67,19 @@ class Cache
 		// Housekeeping
 		void housekeeping(void)
 			{
-				for (_tItMap it = mStorage.begin(); it < mStorage.end(); it++)
+				for (_tItMap it = mStorage.begin(); it != mStorage.end(); it++)
 				{
 					// TODO: Algorithm to perform housekeeping
 				}
 			}
 	protected:
-		// Object Limit
-		unsigned int						mObjectLimit;
-		// Object Storage
-		std::map<_Key, _Value>				mStorage;
 		// Return type
-		static shared_ptr<_Value>			cNULL;
+		_Value								cNULL;
+	private:
+		// Object Limit
+		const unsigned int					mObjectLimit;
+		// Object Storage
+		_tMap								mStorage;
 }; // class
 
 } // namespace

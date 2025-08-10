@@ -40,7 +40,7 @@ class CacheItem : public shared_ptr<_Value>
 		_Value * get(void)
 			{
 				mLastAccess = std::chrono::steady_clock::now();
-				return shared_ptr<_Value>::shared_ptr.get();
+				return shared_ptr<_Value>::get();
 			}
 		// Last Acccess
 		std::chrono::time_point<std::chrono::steady_clock> getLastAccess(void)
