@@ -36,16 +36,22 @@ class TimedCacheItem : public CacheItem<_Value>
 			{
 			}
 	public:
+		// Cache refresh
+		void setTTL(std::chrono::duration<int> ttl)
+			{
+				mTTL = (std::chrono::duration<int>) ttl;
+			}
+	public:
 		// get
 		_Value * get(void)
 			{
 				return CacheItem<_Value>::get();
 			}
 		// Cache refresh
-		void refresh(const std::chrono::duration<int> ttl)
+		void refresh(void)
 			{
 				// Expiry is now plus time
-				mExpiry = std::chrono::steady_clock::now() + ttl;
+				mExpiry = std::chrono::steady_clock::now() + mTTL;
 			}
 		// Last Acccess
 		std::chrono::time_point<std::chrono::steady_clock> getExpiry(void)
@@ -54,7 +60,8 @@ class TimedCacheItem : public CacheItem<_Value>
 			}
 	private:
 		// Timed details
-		std::chrono::time_point<std::chrono::steady_clock>					mExpiry;
+		std::chrono::duration<int>									mTTL;
+		std::chrono::time_point<std::chrono::steady_clock>			mExpiry;
 }; // class
 
 

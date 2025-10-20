@@ -44,25 +44,29 @@ class TimedCache: public Cache<_Key, _Value>
 			{
 			}
 	public:
-		~TimedCache(void);
+		~TimedCache(void)
+			{
+			}
 	public:
 		// Add
-		void add(const _Key & key, const _Value & value)
+		void add(const _Key & key, _Value & value)
 			{
-				Cache<_Value, _Value>::add(key, value);
+				Cache<_Key, _Value>::add(key, value);
+				// Set TTL for the value object to be a uniform time
+				value.setTTL(mExpirySeconds);
 			}
 		// Remove
 		void remove(const _Key & key)
 			{
-				Cache<_Value, _Value>::remove(key);
+				Cache<_Key, _Value>::remove(key);
 			}
 		// Get the object
 		_Value & get(const _Key & key)
 			{
-				_tItMap it = Cache<_Value, _Value>::mStorage.find(key);
-				if (it != Cache<_Value, _Value>::mStorage.end())
+				_tItMap it = Cache<_Key, _Value>::mStorage.find(key);
+				if (it != Cache<_Key, _Value>::mStorage.end())
 				{
-					_Value & value = Cache<_Value, _Value>::mStorage.at(key);
+					_Value & value = Cache<_Key, _Value>::mStorage.at(key);
 					std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
 					std::chrono::time_point<std::chrono::steady_clock> tNow = std::chrono::steady_clock::now();
 					if (tNow < expiry)
@@ -72,16 +76,16 @@ class TimedCache: public Cache<_Key, _Value>
 					else
 					{
 						housekeeping();
-						return Cache<_Value, _Value>::cNULL;
+						return Cache<_Key, _Value>::cNULL;
 					}
 				}
 				else
 				{
-					return Cache<_Value, _Value>::cNULL;
+					return Cache<_Key, _Value>::cNULL;
 				}
 			}
 		// Get the object and refresh
-		_Value & refreshGget(const _Key & key)
+		_Value & refreshGet(const _Key & key)
 			{
 				// Get the object
 				_Value & value = get(key);
@@ -99,16 +103,16 @@ class TimedCache: public Cache<_Key, _Value>
 				if (dNow > mHousekeeping)
 				{
 					_tList removeList;
-					for (_tItMap it = Cache<_Value, _Value>::mStorage.begin(); it != Cache<_Value, _Value>::mStorage.end(); it++)
+					for (_tItMap it = Cache<_Key, _Value>::mStorage.begin(); it != Cache<_Key, _Value>::mStorage.end(); it++)
 					{
 						std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
 						if (dNow > expiry)
 						{
-							removeList.push(it->first);
+							removeList.push_back(it->first);
 						}
 					}
 					// Clear expiry list
-					for (_tItList it = removeList.begin(); it < removeList.end(); it++)
+					for (_tItList it = removeList.begin(); it != removeList.end(); it++)
 					{
 						remove(*it);
 					}
@@ -122,7 +126,7 @@ class TimedCache: public Cache<_Key, _Value>
 			{
 				if (value)
 				{
-					value->refresh(mExpirySeconds);
+					value->refresh();
 				}
 			}
 	private:

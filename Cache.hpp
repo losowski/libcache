@@ -75,11 +75,11 @@ class Cache
 	protected:
 		// Return type
 		_Value								cNULL;
+		// Object Storage
+		_tMap								mStorage;
 	private:
 		// Object Limit
 		const unsigned int					mObjectLimit;
-		// Object Storage
-		_tMap								mStorage;
 }; // class
 
 } // namespace

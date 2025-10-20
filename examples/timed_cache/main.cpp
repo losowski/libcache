@@ -32,6 +32,7 @@ int main (int argc, char * argv[])
 	timedCache.add(2, cItem1);
 	// retrieve data
 	cache::TimedCacheItem<int> & val = timedCache.get(1);
+	val.refresh();
 	shared_ptr<int>sPtr1( val.get() );
 	// exit
 }
