@@ -18,9 +18,6 @@
 */
 
 
-// Base Class
-#include "Cache.hpp"
-
 // Item
 #include "TimedCacheItem.hpp"
 
@@ -31,19 +28,20 @@ namespace cache {
 
 // Class to actually run the code
 template<typename _Key, typename _Value>
-class TimedCache: public Cache<_Key, _Value>
+class TimedCache
 {
 	// Types
-	typedef map<_Key, _Value>					_tMap;
-	typedef typename _tMap::iterator			_tItMap;
+	typedef TimedCacheItem<_Value>						_tValue;
+	typedef map<_Key, _tValue>							_tMap;
+	typedef typename _tMap::iterator					_tItMap;
 
-	typedef list<_Key>							_tList;
-	typedef typename _tList::iterator			_tItList;
+	// Internal
+	typedef list<_Key>									_tList;
+	typedef typename _tList::iterator					_tItList;
 
 	// Class functions
 	public:
-		TimedCache(const unsigned int objectLimit = 1000, const unsigned int expirySeconds = 600):
-				Cache<_Key, _Value>::Cache(objectLimit),
+		TimedCache(const unsigned int expirySeconds = 600):
 				mExpirySeconds(expirySeconds)
 			{
 			}
@@ -53,24 +51,35 @@ class TimedCache: public Cache<_Key, _Value>
 			}
 	public:
 		// Add
-		void add(const _Key & key, _Value & value)
+		void add(const _Key & key, _tValue value)
 			{
-				Cache<_Key, _Value>::add(key, value);
+				if (value)
+				{
+					mStorage.insert(std::pair{key, value});
+				}
 				// Set TTL for the value object to be a uniform time
 				value.setTTL(mExpirySeconds);
 			}
 		// Remove
 		void remove(const _Key & key)
 			{
-				Cache<_Key, _Value>::remove(key);
+				_tItMap it = mStorage.find(key);
+				if (it != mStorage.end())
+				{
+					mStorage.erase(key);
+				}
+				else
+				{
+					housekeeping();
+				}
 			}
 		// Get the object
-		_Value & get(const _Key & key)
+		_tValue get(const _Key & key)
 			{
-				_tItMap it = Cache<_Key, _Value>::mStorage.find(key);
-				if (it != Cache<_Key, _Value>::mStorage.end())
+				_tItMap it = mStorage.find(key);
+				if (it != mStorage.end())
 				{
-					_Value & value = Cache<_Key, _Value>::mStorage.at(key);
+					_tValue & value = mStorage.at(key);
 					std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
 					std::chrono::time_point<std::chrono::steady_clock> tNow = std::chrono::steady_clock::now();
 					if (tNow < expiry)
@@ -80,19 +89,19 @@ class TimedCache: public Cache<_Key, _Value>
 					else
 					{
 						housekeeping();
-						return Cache<_Key, _Value>::cNULL;
+						return cNULL;
 					}
 				}
 				else
 				{
-					return Cache<_Key, _Value>::cNULL;
+					return cNULL;
 				}
 			}
 		// Get the object and refresh
-		_Value & refreshGet(const _Key & key)
+		_tValue refreshGet(const _Key & key)
 			{
 				// Get the object
-				_Value & value = get(key);
+				_tValue value = get(key);
 				// Perform the refresh
 				refresh(value);
 				// Return the object
@@ -107,7 +116,7 @@ class TimedCache: public Cache<_Key, _Value>
 				if (dNow > mHousekeeping)
 				{
 					_tList removeList;
-					for (_tItMap it = Cache<_Key, _Value>::mStorage.begin(); it != Cache<_Key, _Value>::mStorage.end(); it++)
+					for (_tItMap it = mStorage.begin(); it != mStorage.end(); it++)
 					{
 						std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
 						if (dNow > expiry)
@@ -126,13 +135,18 @@ class TimedCache: public Cache<_Key, _Value>
 			}
 	private:
 		// Refresh the object
-		void refresh(_Value * value)
+		void refresh(_tValue value)
 			{
 				if (value)
 				{
 					value->refresh();
 				}
 			}
+	protected:
+		// Return type
+		_tValue								cNULL;
+		// Object Storage
+		_tMap								mStorage;
 	private:
 		// Timed details
 		std::chrono::time_point<std::chrono::steady_clock>			mHousekeeping;

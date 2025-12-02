@@ -12,7 +12,6 @@
 // Base Class
 #include "CacheItem.hpp"
 
-
 using namespace std;
 
 namespace cache {

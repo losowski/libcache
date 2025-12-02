@@ -31,6 +31,13 @@ class CacheItem : public shared_ptr<_Value>
 			// Last Access is now
 			mLastAccess =  std::chrono::steady_clock::now();
 		}
+		// With Self
+		CacheItem(const CacheItem<_Value> & ptr):
+			shared_ptr<_Value>::shared_ptr(ptr)
+			{
+				// Last Access is now
+				mLastAccess =  std::chrono::steady_clock::now();
+			}
 	public:
 		~CacheItem(void)
 			{

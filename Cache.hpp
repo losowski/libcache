@@ -17,8 +17,9 @@ template<typename _Key, typename _Value>
 class Cache
 {
 	// Types
-	typedef map<_Key, _Value>					_tMap;
-	typedef typename _tMap::iterator			_tItMap;
+	typedef CacheItem<_Value>						_tValue;
+	typedef map<_Key, _tValue>						_tMap;
+	typedef typename _tMap::iterator				_tItMap;
 
 	// Class functions
 	public:
@@ -32,11 +33,14 @@ class Cache
 			}
 	public:
 		// Add
-		void add(const _Key & key, const _Value & value)
+		void add(const _Key & key, const _tValue & value)
 			{
 				if (mStorage.size() < mObjectLimit)
 				{
-					mStorage.insert(std::pair{key, value});
+					if (value)
+					{
+						mStorage.insert(std::pair{key, value});
+					}
 				}
 			}
 		// Remove
@@ -53,7 +57,7 @@ class Cache
 				}
 			}
 		// Get
-		_Value & get(const _Key & key)
+		_tValue get(const _Key & key)
 			{
 				_tItMap it = mStorage.find(key);
 				if (it != mStorage.end())
@@ -76,7 +80,7 @@ class Cache
 			}
 	protected:
 		// Return type
-		_Value								cNULL;
+		_tValue								cNULL;
 		// Object Storage
 		_tMap								mStorage;
 	private:
