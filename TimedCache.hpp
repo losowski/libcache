@@ -79,7 +79,7 @@ class TimedCache
 				_tItMap it = mStorage.find(key);
 				if (it != mStorage.end())
 				{
-					_tValue & value = mStorage.at(key);
+					_tValue value = mStorage.at(key);
 					std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
 					std::chrono::time_point<std::chrono::steady_clock> tNow = std::chrono::steady_clock::now();
 					if (tNow < expiry)
@@ -107,7 +107,15 @@ class TimedCache
 				// Return the object
 				return value;
 			}
-
+	private:
+		// Refresh the object
+		void refresh(_tValue value)
+			{
+				if (value)
+				{
+					value.refresh();
+				}
+			}
 		// Perform houseKeeping
 		void housekeeping(void)
 			{
@@ -133,15 +141,7 @@ class TimedCache
 					mHousekeeping = dNow + mExpirySeconds;
 				}
 			}
-	private:
-		// Refresh the object
-		void refresh(_tValue value)
-			{
-				if (value)
-				{
-					value->refresh();
-				}
-			}
+
 	protected:
 		// Return type
 		_tValue								cNULL;
