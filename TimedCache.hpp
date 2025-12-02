@@ -2,7 +2,7 @@
 #define TIMEDCACHE_HPP
 
 
-// Container
+// Standard Library
 #include <map>
 #include <list>
 
@@ -20,6 +20,10 @@
 
 // Base Class
 #include "Cache.hpp"
+
+// Item
+#include "TimedCacheItem.hpp"
+
 
 using namespace std;
 

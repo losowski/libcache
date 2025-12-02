@@ -1,7 +1,7 @@
 #ifndef TIMEDCACHEITEM_HPP
 #define TIMEDCACHEITEM_HPP
 
-// Data
+// Standard Library
 #include <memory>
 
 // Required libraries

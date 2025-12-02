@@ -1,10 +1,12 @@
 #ifndef CACHEBASE_HPP
 #define CACHEBASE_HPP
 
-// Container
+// Standard Library
 #include <map>
 #include <memory>
 
+// Cache item
+#include "CacheItem.hpp"
 
 using namespace std;
 
