@@ -50,12 +50,16 @@ class TimedCache
 			{
 			}
 	public:
+		size_t size(void)
+			{
+				return mStorage.size();
+			}
 		// Add
 		void add(const _Key & key, _tValue value)
 			{
 				if (value)
 				{
-					mStorage.insert(std::pair{key, value});
+					mStorage.insert(std::pair<_Key, _tValue>(key, value));
 				}
 				// Set TTL for the value object to be a uniform time
 				value.setTTL(mExpirySeconds);
@@ -82,7 +86,7 @@ class TimedCache
 					_tValue value = mStorage.at(key);
 					std::chrono::time_point<std::chrono::steady_clock> expiry = it->second.getExpiry();
 					std::chrono::time_point<std::chrono::steady_clock> tNow = std::chrono::steady_clock::now();
-					if (tNow < expiry)
+					if (tNow > expiry)
 					{
 						return value;
 					}
